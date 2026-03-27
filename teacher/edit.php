@@ -71,7 +71,7 @@
                         </a>
 
                         <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                           <nav class="sb-sidenav-menu-nested nav ms-4 border-start border-secondary border-opacity-25 ps-3">
+                            <nav class="sb-sidenav-menu-nested nav ms-4 border-start border-secondary border-opacity-25 ps-3">
                                 <a class="nav-link py-2 mb-1 rounded-2 text-muted-hover" href="../students/student.php">
                                     <i class="fas fa-user-graduate me-2 small"></i> Students
                                 </a>
@@ -95,10 +95,11 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mt-4">
                         <div>
-                            <h1 class="text-dark fw-bold mb-0 border-start border-primary border-5 ps-3">
-                                Edit Teacher Profile
+                            <h1 class="text-primary fw-bold mb-0 border-start border-primary border-5 ps-3">
+                            <i class="fas fa-user-edit me-2"></i>   
+                            Edit Teacher Profile
                             </h1>
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0 ps-3">
@@ -114,69 +115,138 @@
                             </a>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <form method="POST" action="./createAction.php" class="border p-3 rounded-3" enctype="multipart/form-data">
+                    <hr class="my-4">
+
+                    <div class="card-body bg-light-50 p-4">
+                        <?php
+                        include "../init/db.init.php";
+
+                        // Get teacher data by ID
+                        $id = $_GET['teacher_id'] ?? '';
+                        $teacher = [];
+
+                        if ($id) {
+                            $stmt = $db->prepare("SELECT * FROM tbl_teachers WHERE teacher_id = ?");
+                            $stmt->bind_param("i", $id);
+                            $stmt->execute();
+                            $result = $stmt->get_result();
+                            $teacher = $result->fetch_assoc();
+                            $stmt->close();
+                        }
+
+                        // Fetch courses for dropdown
+                        $courses = [];
+                        $result = $db->query("SELECT id, course_name FROM tbl_course");
+                        if ($result && $result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                                $courses[] = $row;
+                            }
+                        }
+                        ?>
+                        <form method="POST" action="./editNewAction.php" class="shadow-sm bg-white p-4 rounded-3 border" enctype="multipart/form-data">
+                            <input type="hidden" name="teacher_id" value="<?= htmlspecialchars($teacher['teacher_id']); ?>">
+
                             <div class="row">
-                                <div class="mb-3 col-md-6">
-                                    <label for="title" class="form-label">Teacher_name</label>
-                                    <input type="text" name="teacher_name" class="form-control" id="teacher_name" placeholder="Input teacher_name">
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <label for="title" class="form-label">Gender</label>
-                                    <select class="form-control form-select" name="gender" id="gender">
-                                        <option value="choosegender">Choose gender</option>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                    </select>
-                                </div>
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="mb-3 col-md-6">
+                                            <label class="form-label fw-semibold">Teacher Name</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
+                                                <input type="text" name="teacher_name" class="form-control" placeholder="Enter Full Name" value="<?= htmlspecialchars($teacher['teacher_name']); ?>" required>
+                                            </div>
+                                        </div>
 
-                                <div class="mb-3 col-md-6">
-                                    <label for="title" class="form-label">Phone</label>
-                                    <input type="text" name="phone" class="form-control" id="phone" placeholder="Input phone">
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <label for="title" class="form-label">Start_date</label>
-                                    <input type="date" name="start_date" class="form-control" placeholder="start_date">
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <label for="title" class="form-label">Start_date</label>
-                                    <input type="date" name="start_date" class="form-control" placeholder="start_date">
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <label for="title" class="form-label">Course</label>
-                                    <select class="form-control form-select" name="course">
-                                        <option value="choosecourse">Choose course</option>
-                                        <option value="php">Php</option>
-                                        <option value="csharp">C#</option>
-                                        <option value="cpp">C++</option>
-                                        <option value="cprogramming">C Programming</option>
-                                        <option value="vue">Vue</option>
-                                        <option value="javascript">JavaScript</option>
-                                        <option value="css">CSS</option>
-                                        <option value="java">Java</option>
+                                        <div class="mb-3 col-md-6">
+                                            <label class="form-label fw-semibold">Gender</label>
+                                            <select name="gender" class="form-select">
+                                                <option value="" disabled>Select gender</option>
+                                                <option value="Male" <?= $teacher['gender'] == 'Male' ? 'selected' : '' ?>>Male</option>
+                                                <option value="Female" <?= $teacher['gender'] == 'Female' ? 'selected' : '' ?>>Female</option>
+                                                <option value="Other" <?= $teacher['gender'] == 'Other' ? 'selected' : '' ?>>Other</option>
+                                            </select>
+                                        </div>
 
-                                    </select>
-                                </div>
+                                        <div class="mb-3 col-md-6">
+                                            <label class="form-label fw-semibold">Phone Number</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light"><i class="fas fa-phone text-muted"></i></span>
+                                                <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($teacher['phone']); ?>">
+                                            </div>
+                                        </div>
 
-                                <div class="mb-3 col-md-6">
-                                    <label for="slidePhoto" class="form-label"> Photo</label>
-                                    <input type="file" accept="image/*" name="photo" class="form-control" id="photo" onchange="previewImage(event)">
-                                    <img id="imagePreview" style="display:none; margin-top: 10px; max-width: 20%; height: auto;" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <label for="title" class="form-label">Address</label>
-                                    <div class="form-floating">
-                                        <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
-                                        <label for="floatingTextarea">Comments</label>
+                                        <div class="mb-3 col-md-6">
+                                            <label class="form-label fw-semibold">Assigned Course</label>
+                                            <select name="course_id" class="form-select">
+                                                <option value="" disabled>Select course</option>
+                                                <?php foreach ($courses as $course) : ?>
+                                                    <option value="<?= $course['id'] ?>" <?= isset($teacher['course_id']) && $teacher['course_id'] == $course['id'] ? 'selected' : '' ?>>
+                                                        <?= htmlspecialchars($course['course_name']) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3 col-md-6">
+                                            <label class="form-label fw-semibold">Contract Start</label>
+                                            <input type="datetime-local" name="start_date" class="form-control" value="<?= date('Y-m-d\TH:i', strtotime($teacher['start_date'])) ?>">
+                                        </div>
+
+                                        <div class="mb-3 col-md-6">
+                                            <label class="form-label fw-semibold">Contract End</label>
+                                            <input type="datetime-local" name="end_date" class="form-control" value="<?= date('Y-m-d\TH:i', strtotime($teacher['end_date'])) ?>">
+                                        </div>
+
+                                        <div class="mb-3 col-12">
+                                            <label class="form-label fw-semibold">Home Address</label>
+                                            <textarea name="address" class="form-control" rows="2"><?= htmlspecialchars($teacher['address']); ?></textarea>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class=" col-md-6">
-                                    <button name="btn_save" type="submit" class="btn btn-success mb-2 mt-2">Update New</button>
+                                <div class="col-md-4 border-start ps-4 text-center">
+                                    <label class="form-label fw-semibold d-block">Profile Photo</label>
+                                    <div class="mb-3">
+                                        <?php
+                                        $currentPhoto = !empty($teacher['photo']) ? htmlspecialchars($teacher['photo']) : 'https://via.placeholder.com/150';
+                                        ?>
+                                        <img id="imagePreview" src="<?= $currentPhoto ?>"
+                                            class="img-thumbnail shadow-sm mb-3"
+                                            style="width: 180px; height: 180px; object-fit: cover; border-radius: 50%;">
+
+                                        <div class="mt-2">
+                                            <label for="photoInput" class="btn btn-outline-secondary btn-sm">
+                                                <i class="fas fa-camera me-1"></i> Change Photo
+                                            </label>
+                                            <input id="photoInput" type="file" accept="image/*" name="photo" class="d-none" onchange="previewImage(event)">
+                                            <p class="text-muted small mt-2">Allowed: JPG, PNG (Max 2MB)</p>
+                                        </div>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="./teacher.php" class="btn btn-light border px-4">Cancel</a>
+                                <button name="btn_update" type="submit" class="btn btn-primary px-4 fw-bold shadow-sm">
+                                    <i class="fas fa-save me-1"></i> Update Teacher Record
+                                </button>
                             </div>
                         </form>
                     </div>
+
+                    <script>
+                        function previewImage(event) {
+                            const preview = document.getElementById('imagePreview');
+                            const file = event.target.files[0];
+
+                            if (file) {
+                                preview.src = URL.createObjectURL(file);
+                                preview.style.display = 'inline-block';
+                            }
+                        }
+                    </script>
                 </div>
             </main>
 

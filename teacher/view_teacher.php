@@ -19,7 +19,7 @@
 <body>
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Brand-->
-        <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
+        <a class="navbar-brand ps-3" href="index.html">Course Bootstrap</a>
         <!-- Sidebar Toggle-->
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
         <!-- Navbar Search-->
@@ -72,7 +72,7 @@
 
                         <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
                             <nav class="sb-sidenav-menu-nested nav ms-4 border-start border-secondary border-opacity-25 ps-3">
-                                <a class="nav-link py-2 mb-1 rounded-2 text-muted-hover" href="./students/student.php">
+                                <a class="nav-link py-2 mb-1 rounded-2 text-muted-hover" href="../students/student.php">
                                     <i class="fas fa-user-graduate me-2 small"></i> Students
                                 </a>
                                 <a class="nav-link py-2 mb-1 rounded-2 text-muted-hover" href="../teacher/teacher.php">
@@ -95,79 +95,98 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
-                        <h1 class="text-dark fw-bold border-start border-danger border-5 ps-3">Students Directory</h1>
-                        <a href="./createNew.php" class="btn btn-success shadow-sm">
-                            <i class="bi bi-plus-circle me-1"></i> Add New Teacher
-                        </a>
+                    <div class="d-flex align-items-center justify-content-between mt-4 mb-4">
+                        <h1 class="h2">Teacher Profile</h1>
+                        <div class="d-flex align-items-center">
+                            <a href="./teacher.php" class="btn btn-outline-danger shadow-sm px-4">
+                                <i class="bi bi-arrow-left me-1"></i> Back to Directory
+                            </a>
+                        </div>
                     </div>
 
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="card-title mb-0 text-muted"><i class="bi bi-table me-2"></i>Student Records</h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr class="text-center">
-                                            <th>ID</th>
-                                            <th>Photo</th>
-                                            <th>Teacher Name</th>
-                                            <th>Course Name</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
+                    <?php
+                    include "../init/db.init.php";
+                    $id = intval($_GET['teacher_id']);
 
-                                    <tbody class="text-center">
-                                        <?php
-                                        include "../init/db.init.php";
-                                        $sql = "SELECT tbl_students.*, tbl_course.course_name 
-                  FROM tbl_students 
-                  LEFT JOIN tbl_course ON tbl_students.course = tbl_course.id";
+                    $sql = "SELECT tbl_teachers.*, tbl_course.course_name 
+                    FROM tbl_teachers
+                    LEFT JOIN tbl_course ON tbl_teachers.course_id = tbl_course.id
+                    WHERE tbl_teachers.teacher_id = ?";
 
-                                        $result = $db->query($sql);
-                                        if ($result && $result->num_rows > 0) {
-                                            while ($row = $result->fetch_assoc()) {
-                                        ?>
-                                                <tr>
-                                                    <td class="ps-4 fw-bold text-muted">#<?php echo $row['id'] ?></td>
-                                                    <td>
-                                                        <img src="<?php echo $row['photo']  ?>"
-                                                            alt="Profile"
-                                                            width="50"
-                                                            height="50"
-                                                            class="rounded-circle object-fit-cover border">
-                                                    </td>
-                                                    <td>
-                                                        <div class=" text-dark"><?php echo htmlspecialchars($row['student_name']) ?></div>
-                                                    </td>
-                                                    <td>
-                                                        <span>
-                                                            <?php echo htmlspecialchars($row['course_name'] ?? 'N/A') ?>
-                                                        </span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <a href="./view_student.php?id=<?php echo $row['id']; ?>" class="btn btn-primary">View</a>
-                                                        <a href="./edit.php?id=<?php echo $row['id']; ?>" class="btn btn-success">Edit</a>
-                                                        <a href='./delete.php?id=<?php echo $row['id'] ?> ' onclick="return confirm('Are you sure you want to delete this record?');" class="btn btn-danger">Delete</a>
-                                                    </td>
-                                                </tr>
-                                        <?php
-                                            }
-                                        }
-                                        ?>
-                                    </tbody>
-                                </table>
+                    $stmt = $db->prepare($sql);
+                    $stmt->bind_param("i", $id);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $course = $result->fetch_assoc();
+
+                    $stmt->close();
+                    $db->close();
+
+                    if ($course):
+                    ?>
+                        <div class="card shadow-sm border-0">
+                            <div class="row g-0">
+                                <div class="col-md-4 bg-light text-center p-5 d-flex align-items-center justify-content-center border-end">
+                                    <?php
+                                    $photoPath = (!empty($course['photo']) && file_exists($course['photo']))
+                                        ? htmlspecialchars($course['photo'])
+                                        : "https://via.placeholder.com/300x300?text=No+Photo";
+                                    ?>
+                                    <img src="<?= $photoPath ?>"
+                                        class="img-fluid rounded-circle shadow"
+                                        style="width: 250px; height: 250px; object-fit: cover;"
+                                        alt="Teacher Photo" />
+                                </div>
+
+                                <div class="col-md-8">
+                                    <div class="card-body p-5">
+                                        <h2 class="card-title text-primary mb-1">
+                                            <?= htmlspecialchars($course['teacher_name']); ?>
+                                        </h2>
+                                        <p class="text-muted mb-4">ID: #<?= htmlspecialchars($course['teacher_id']); ?></p>
+
+                                        <hr>
+
+                                        <div class="row mt-4">
+                                            <div class="col-sm-4">
+                                                <p class="mb-0 fw-bold">Department / Course</p>
+                                            </div>
+                                            <div class="col-sm-8 text-secondary">
+                                                <?= htmlspecialchars($course['course_name'] ?? 'Not Assigned') ?>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <p class="mb-0 fw-bold">Phone Number</p>
+                                            </div>
+                                            <div class="col-sm-8 text-secondary">
+                                                <?= htmlspecialchars($course['phone'] ?? 'N/A') ?>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <p class="mb-0 fw-bold">Office Address</p>
+                                            </div>
+                                            <div class="col-sm-8 text-secondary">
+                                                <?= htmlspecialchars($course['address'] ?? 'N/A') ?>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <a href="./edit.php?teacher_id=<?php echo $course['teacher_id']; ?>" class="btn btn-success">Edit Profile</a>                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    <?php else: ?>
+                        <div class="alert alert-warning">Teacher record not found.</div>
+                    <?php endif; ?>
 
-                    <div class="py-5"></div>
                 </div>
-
+                <div style="height: 10vh"></div>
             </main>
-
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>

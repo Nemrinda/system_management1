@@ -95,8 +95,17 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-3 text-success  fw-bold fs-1 text-center ">View Course Information</h1>
-                    <a href="./course.php" class="btn btn-danger mb-3 mt-3">Back to List</a>
+                    <div class="text-center py-4">
+                        <h1 class="mt-3 text-success fw-bold display-4">View Course Information</h1>
+                        <p class="text-muted">Detailed overview of the selected academic module</p>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <a href="./course.php" class="btn btn-danger shadow-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Back to List
+                        </a>
+                    </div>
+
 
                     <?php
                     include "../init/db.init.php";
@@ -157,9 +166,8 @@
                     ?>
                 </div>
                 <div style="height: 100vh"></div>
+            </main>
         </div>
-        </main>
-
     </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>

@@ -152,7 +152,7 @@
                                                         </span>
                                                     </td>
                                                     <td class="text-center">
-                                                        <a href="./view_course.php?teacher_id=<?php echo $row['teacher_id']; ?>" class="btn btn-primary">View</a>
+                                                        <a href="./view_teacher.php?teacher_id=<?php echo $row['teacher_id']; ?>" class="btn btn-primary">View</a>
                                                         <a href="./edit.php?teacher_id=<?php echo $row['teacher_id']; ?>" class="btn btn-success">Edit</a>
                                                         <a href='./delete.php?teacher_id=<?php echo $row['teacher_id'] ?> ' onclick="return confirm('Are you sure you want to delete this record?');" class="btn btn-danger">Delete</a>
                                                     </td>
